@@ -22,7 +22,13 @@ const gameState = {
     x: 7,
     y: 6,
   },
-  gridSize: 20
+  gridSize: 20,
+  handlers: [
+    {
+      event: 'keydown',
+      handler: keydown
+    }
+  ]
 }
 
 function setState(stateToChange,newState) {
@@ -32,14 +38,36 @@ function setState(stateToChange,newState) {
 function start() {
   console.log("Ready to play!")
   console.log("You can play the game with the arrows of your keyboard, have fun! 🚀")
+
   ctx = gameScreen.getContext('2d');
 
   gameScreen.width = gameScreen.height = 600
   ctx.fillStyle = BG_COLOUR;
   ctx.clearRect(0, 0, gameScreen.width, gameScreen.height);
   handleScore(gameState.player.score)
-  document.addEventListener('keydown', keydown);
+
+  handlers(gameState.handlers)
   paintGame(gameState);
+
+  setTime(5000)
+}
+
+function setTime(time = 3000) {
+  setTimeout(() => {
+    finishGame();
+  }, time)
+}
+
+function finishGame() {
+  document.removeEventListener('keydown', keydown);
+
+  window.alert(`Game Over! Your score is ${gameState.player.score}`);
+}
+
+function handlers(handlers) {
+  handlers.forEach(handler => {
+    document.addEventListener(handler.event, handler.handler);
+  })
 }
 
 requestAnimationFrame(start)
@@ -73,9 +101,10 @@ function moveRight(player) {
     fillCanvasPlayer(player.pos.x, player.pos.y, size, SNAKE_COLOUR);
     return;
   }
+
   foodGenerate(gameState);
 
-  setState(player.pos, { x: player.pos.x += player.speed.x, y: player.pos.y})
+  setState(player.pos, { x: player.pos.x += player.speed.x })
   fillCanvasPlayer(player.pos.x, player.pos.y, size, SNAKE_COLOUR);
 }
 
@@ -90,7 +119,7 @@ function moveLeft(player) {
   }
   foodGenerate(gameState);
 
-  setState(player.pos, { x: player.pos.x -= player.speed.x, y: player.pos.y})
+  setState(player.pos, { x: player.pos.x -= player.speed.x })
   fillCanvasPlayer(player.pos.x, player.pos.y, size, SNAKE_COLOUR);
 }
 
@@ -107,7 +136,7 @@ function moveUp(player) {
 
   foodGenerate(gameState);
 
-  setState(player.pos, { x: player.pos.x, y:player.pos.y -= player.speed.y })
+  setState(player.pos, { y:player.pos.y -= player.speed.y })
   fillCanvasPlayer(player.pos.x, player.pos.y, size, SNAKE_COLOUR);
 }
 
@@ -122,7 +151,6 @@ function stateListener(state) {
   }
 }
 
-
 function moveDown(player) {
   ctx.clearRect(0, 0, gameScreen.width, gameScreen.height);
 
@@ -135,7 +163,7 @@ function moveDown(player) {
   }
 
   foodGenerate(gameState);
-  setState(player.pos, { x: player.pos.x, y: player.pos.y += player.speed.y })
+  setState(player.pos, { y: player.pos.y += player.speed.y })
   fillCanvasPlayer(player.pos.x, player.pos.y, size, SNAKE_COLOUR);
 }
 

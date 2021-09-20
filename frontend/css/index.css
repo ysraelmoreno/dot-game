@@ -19,6 +19,7 @@ canvas {
 
 #gameScore {
   font-family: "Poppins";
+  font-weight: regular;
   position: absolute;
   color: white;
   top: 0;

@@ -81,11 +81,12 @@ function handleScore(score) {
 function foodRegeneration(state) {
   const foods = state.food;
 
-  const position = Math.floor(Math.random() * (19 - 0 + 1) + 0);
+  const positionX = Math.floor(Math.random() * (19 - 0 + 1) + 0);
+  const positionY = Math.floor(Math.random() * (19 - 0 + 1) + 0);
 
   foods.forEach(food => {
     console.log(food)
-    setState(food, { x: position, y: position })
+    setState(food, { x: positionX, y: positionY })
     foodGenerate(state)
   })
 }

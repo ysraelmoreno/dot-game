@@ -1,10 +1,12 @@
 const gameScreen = document.getElementById('gameScreen');
 const gameScore = document.getElementById('gameScore');
+const gameUsername = document.getElementById('gameUsername');
 const BG_COLOUR = '#231f20';
-const FOOD_COLOUR = '#977f85';
+const FOOD_COLOUR = 'rgb(21, 255, 0)';
 const SNAKE_COLOUR = '#f5f5f5';
 
 let ctx;
+
 
 const gameState = {
   player: {
@@ -18,10 +20,12 @@ const gameState = {
     },
     score: 0
   },
-  food: {
-    x: 7,
-    y: 6,
-  },
+  food: [
+    {
+      x: 3,
+      y: 6
+    }
+  ],
   gridSize: 20,
   handlers: [
     {
@@ -45,14 +49,12 @@ function start() {
   ctx.fillStyle = BG_COLOUR;
   ctx.clearRect(0, 0, gameScreen.width, gameScreen.height);
   handleScore(gameState.player.score)
-
   handlers(gameState.handlers)
   paintGame(gameState);
 
-  setTime(5000)
 }
 
-function setTime(time = 3000) {
+function setGameTime(time = 3000) {
   setTimeout(() => {
     finishGame();
   }, time)
@@ -61,7 +63,7 @@ function setTime(time = 3000) {
 function finishGame() {
   document.removeEventListener('keydown', keydown);
 
-  window.alert(`Game Over! Your score is ${gameState.player.score}`);
+  window.alert(`Game Over ${gameUsername.innerHTML}! Your score is ${gameState.player.score}`);
 }
 
 function handlers(handlers) {
@@ -77,66 +79,74 @@ function handleScore(score) {
 }
 
 function foodRegeneration(state) {
+  const foods = state.food;
+
   const position = Math.floor(Math.random() * (19 - 0 + 1) + 0);
 
-  setState(state.food, { x: position, y: position })
-  foodGenerate(state)
+  foods.forEach(food => {
+    console.log(food)
+    setState(food, { x: position, y: position })
+    foodGenerate(state)
+  })
 }
 
 function foodGenerate(state) {
-  const gridSize = state.gridSize;
-  const size = gameScreen.width / gridSize;
+  const size = gameScreen.width / state.gridSize;
 
-  ctx.fillStyle = FOOD_COLOUR;
-  ctx.fillRect(state.food.x * size, state.food.y * size, size, size);
+  state.food.forEach(food => {
+    ctx.fillStyle = FOOD_COLOUR;
+    ctx.fillRect(food.x * size, food.y * size, size, size);
+  })
 }
 
 function moveRight(player) {
   ctx.clearRect(0, 0, gameScreen.width, gameScreen.height);
+  foodGenerate(gameState);
 
   const size = gameScreen.width / gameState.gridSize;
 
   if(player.pos.x >= gameState.gridSize - 1) {
-    foodGenerate(gameState);
     fillCanvasPlayer(player.pos.x, player.pos.y, size, SNAKE_COLOUR);
     return;
   }
 
-  foodGenerate(gameState);
+  const newState = { x: player.pos.x + player.speed.x }
 
-  setState(player.pos, { x: player.pos.x += player.speed.x })
+  setState(player.pos, newState)
   fillCanvasPlayer(player.pos.x, player.pos.y, size, SNAKE_COLOUR);
 }
 
 function moveLeft(player) {
   ctx.clearRect(0, 0, gameScreen.width, gameScreen.height);
+  foodGenerate(gameState);
+
   const size = gameScreen.width / gameState.gridSize;
 
   if(player.pos.x <= 0) {
-    foodGenerate(gameState);
     fillCanvasPlayer(player.pos.x, player.pos.y, size, SNAKE_COLOUR);
     return;
   }
-  foodGenerate(gameState);
 
-  setState(player.pos, { x: player.pos.x -= player.speed.x })
+  const newState = { x: player.pos.x - player.speed.x }
+
+  setState(player.pos, newState)
   fillCanvasPlayer(player.pos.x, player.pos.y, size, SNAKE_COLOUR);
 }
 
 function moveUp(player) {
   ctx.clearRect(0, 0, gameScreen.width, gameScreen.height);
+  foodGenerate(gameState);
 
   const size = gameScreen.width / gameState.gridSize;
 
   if(player.pos.y <= 0) {
-    foodGenerate(gameState);
     fillCanvasPlayer(player.pos.x, player.pos.y, size, SNAKE_COLOUR);
     return;
   }
 
-  foodGenerate(gameState);
+  const newState = { y: player.pos.y - player.speed.y }
 
-  setState(player.pos, { y:player.pos.y -= player.speed.y })
+  setState(player.pos, newState)
   fillCanvasPlayer(player.pos.x, player.pos.y, size, SNAKE_COLOUR);
 }
 
@@ -144,38 +154,42 @@ function stateListener(state) {
   const player = state.player;
   const food = state.food;
 
-  if(player.pos.x === food.x && player.pos.y === food.y) {
-    Object.assign(player, { score: player.score + 1 })
-    handleScore(gameState.player.score)
-    foodRegeneration(gameState);
-  }
+  food.forEach(item => {
+    if(player.pos.x === item.x && player.pos.y === item.y) {
+      Object.assign(player, { score: player.score + 1 })
+      handleScore(gameState.player.score)
+      foodRegeneration(gameState);
+    }
+  })
+
 }
 
 function moveDown(player) {
   ctx.clearRect(0, 0, gameScreen.width, gameScreen.height);
-
+  foodGenerate(gameState);
   const size = gameScreen.width / gameState.gridSize;
 
   if(player.pos.y >= gameState.gridSize - 1) {
-    foodGenerate(gameState);
     fillCanvasPlayer(player.pos.x, player.pos.y, size, SNAKE_COLOUR);
     return;
   }
 
-  foodGenerate(gameState);
-  setState(player.pos, { y: player.pos.y += player.speed.y })
+  const newState = { y: player.pos.y + player.speed.y }
+
+  setState(player.pos, newState)
   fillCanvasPlayer(player.pos.x, player.pos.y, size, SNAKE_COLOUR);
 }
 
 function keydown(e) {
   const player = gameState.player;
-
   const keyboardState = {
     ArrowRight: moveRight,
     ArrowLeft: moveLeft,
     ArrowUp: moveUp,
     ArrowDown: moveDown
   }
+
+  if(!Object.keys(keyboardState).includes(e.key)) return;
 
   keyboardState[e.key](player);
 
@@ -187,13 +201,13 @@ function fillCanvasPlayer(xPosition,yPosition, size, color) {
   ctx.fillRect(xPosition * size, yPosition * size, size, size);
 }
 
-
 function paintGame(state) {
   ctx.fillStyle = BG_COLOUR;
 
   const gridSize = state.gridSize;
 
   const size = gameScreen.width / gridSize;
+
   foodGenerate(state)
 
   paintPlayer(state.player, size, SNAKE_COLOUR)
@@ -206,4 +220,3 @@ function paintPlayer(player, size, colour) {
   ctx.fillStyle = colour;
   ctx.fillRect(playerPosition.x * size, playerPosition.y * size, size, size);
 }
-

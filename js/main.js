@@ -1,78 +1,90 @@
-const gameScreen = document.getElementById('gameScreen');
-const gameScore = document.getElementById('gameScore');
-const gameUsername = document.getElementById('gameUsername');
-const BG_COLOUR = '#231f20';
-const FOOD_COLOUR = 'rgb(21, 255, 0)';
-const SNAKE_COLOUR = '#f5f5f5';
+const BG_COLOUR = "#231f20";
+const FOOD_COLOUR = "rgb(21, 255, 0)";
+const SNAKE_COLOUR = "#f5f5f5";
 
 let ctx;
-
 
 const gameState = {
   player: {
     pos: {
       x: 3,
-      y: 10
+      y: 10,
     },
     speed: {
       x: 1,
-      y: 1
+      y: 1,
     },
-    score: 0
+    score: 0,
   },
   food: [
     {
       x: 3,
-      y: 6
-    }
+      y: 6,
+    },
+    {
+      x: 5,
+      y: 2,
+    },
   ],
   gridSize: 20,
+  currentTime: 0,
   handlers: [
     {
-      event: 'keydown',
-      handler: keydown
-    }
-  ]
-}
+      event: "keydown",
+      handler: keydown,
+    },
+  ],
+};
 
-function setState(stateToChange,newState) {
-  Object.assign(stateToChange, newState)
+function setState(stateToChange, newState) {
+  Object.assign(stateToChange, newState);
 }
 
 function start() {
-  console.log("Ready to play!")
-  console.log("You can play the game with the arrows of your keyboard, have fun! 🚀")
+  console.log("Ready to play!");
+  console.log(
+    "You can play the game with the arrows of your keyboard, have fun! 🚀"
+  );
 
-  ctx = gameScreen.getContext('2d');
+  ctx = gameScreen.getContext("2d");
 
-  gameScreen.width = gameScreen.height = 600
+  gameScreen.width = gameScreen.height = 600;
   ctx.fillStyle = BG_COLOUR;
   ctx.clearRect(0, 0, gameScreen.width, gameScreen.height);
-  handleScore(gameState.player.score)
-  handlers(gameState.handlers)
+  handleScore(gameState.player.score);
+  handlers(gameState.handlers);
   paintGame(gameState);
 
+  document.addEventListener("timeupdate", () => {
+    gameTime.innerHTML = `Time: ${(gameState.currentTime += 1)}`;
+  });
+
+  setGameTime(3000);
 }
 
 function setGameTime(time = 3000) {
   setTimeout(() => {
+    gameTime.innerHTML = `Time: ${(gameState.currentTime += 1)}`;
+
     finishGame();
-  }, time)
+  }, time);
 }
 
 function finishGame() {
-  document.removeEventListener('keydown', keydown);
+  document.removeEventListener("keydown", keydown);
 
-  window.alert(`Game Over ${gameUsername.innerHTML}! Your score is ${gameState.player.score}`);
+  window.alert(
+    `Game Over ${gameUsername.innerHTML}! Your score is ${gameState.player.score}`
+  );
 }
 
 function handlers(handlers) {
-  handlers.forEach(handler => {
+  handlers.forEach((handler) => {
     document.addEventListener(handler.event, handler.handler);
-  })
+  });
 }
 
-requestAnimationFrame(start)
+requestAnimationFrame(start);
 
 function handleScore(score) {
   gameScore.innerHTML = `Score: ${score}`;
@@ -84,20 +96,20 @@ function foodRegeneration(state) {
   const positionX = Math.floor(Math.random() * (19 - 0 + 1) + 0);
   const positionY = Math.floor(Math.random() * (19 - 0 + 1) + 0);
 
-  foods.forEach(food => {
-    console.log(food)
-    setState(food, { x: positionX, y: positionY })
-    foodGenerate(state)
-  })
+  foods.forEach((food) => {
+    console.log(food);
+    setState(food, { x: positionX, y: positionY });
+    foodGenerate(state);
+  });
 }
 
 function foodGenerate(state) {
   const size = gameScreen.width / state.gridSize;
 
-  state.food.forEach(food => {
+  state.food.forEach((food) => {
     ctx.fillStyle = FOOD_COLOUR;
     ctx.fillRect(food.x * size, food.y * size, size, size);
-  })
+  });
 }
 
 function moveRight(player) {
@@ -106,14 +118,14 @@ function moveRight(player) {
 
   const size = gameScreen.width / gameState.gridSize;
 
-  if(player.pos.x >= gameState.gridSize - 1) {
+  if (player.pos.x >= gameState.gridSize - 1) {
     fillCanvasPlayer(player.pos.x, player.pos.y, size, SNAKE_COLOUR);
     return;
   }
 
-  const newState = { x: player.pos.x + player.speed.x }
+  const newState = { x: player.pos.x + player.speed.x };
 
-  setState(player.pos, newState)
+  setState(player.pos, newState);
   fillCanvasPlayer(player.pos.x, player.pos.y, size, SNAKE_COLOUR);
 }
 
@@ -123,14 +135,14 @@ function moveLeft(player) {
 
   const size = gameScreen.width / gameState.gridSize;
 
-  if(player.pos.x <= 0) {
+  if (player.pos.x <= 0) {
     fillCanvasPlayer(player.pos.x, player.pos.y, size, SNAKE_COLOUR);
     return;
   }
 
-  const newState = { x: player.pos.x - player.speed.x }
+  const newState = { x: player.pos.x - player.speed.x };
 
-  setState(player.pos, newState)
+  setState(player.pos, newState);
   fillCanvasPlayer(player.pos.x, player.pos.y, size, SNAKE_COLOUR);
 }
 
@@ -140,14 +152,14 @@ function moveUp(player) {
 
   const size = gameScreen.width / gameState.gridSize;
 
-  if(player.pos.y <= 0) {
+  if (player.pos.y <= 0) {
     fillCanvasPlayer(player.pos.x, player.pos.y, size, SNAKE_COLOUR);
     return;
   }
 
-  const newState = { y: player.pos.y - player.speed.y }
+  const newState = { y: player.pos.y - player.speed.y };
 
-  setState(player.pos, newState)
+  setState(player.pos, newState);
   fillCanvasPlayer(player.pos.x, player.pos.y, size, SNAKE_COLOUR);
 }
 
@@ -155,14 +167,13 @@ function stateListener(state) {
   const player = state.player;
   const food = state.food;
 
-  food.forEach(item => {
-    if(player.pos.x === item.x && player.pos.y === item.y) {
-      Object.assign(player, { score: player.score + 1 })
-      handleScore(gameState.player.score)
+  food.forEach((item) => {
+    if (player.pos.x === item.x && player.pos.y === item.y) {
+      Object.assign(player, { score: player.score + 1 });
+      handleScore(gameState.player.score);
       foodRegeneration(gameState);
     }
-  })
-
+  });
 }
 
 function moveDown(player) {
@@ -170,34 +181,35 @@ function moveDown(player) {
   foodGenerate(gameState);
   const size = gameScreen.width / gameState.gridSize;
 
-  if(player.pos.y >= gameState.gridSize - 1) {
+  if (player.pos.y >= gameState.gridSize - 1) {
     fillCanvasPlayer(player.pos.x, player.pos.y, size, SNAKE_COLOUR);
     return;
   }
 
-  const newState = { y: player.pos.y + player.speed.y }
+  const newState = { y: player.pos.y + player.speed.y };
 
-  setState(player.pos, newState)
+  setState(player.pos, newState);
   fillCanvasPlayer(player.pos.x, player.pos.y, size, SNAKE_COLOUR);
 }
 
 function keydown(e) {
   const player = gameState.player;
+
   const keyboardState = {
     ArrowRight: moveRight,
     ArrowLeft: moveLeft,
     ArrowUp: moveUp,
-    ArrowDown: moveDown
-  }
+    ArrowDown: moveDown,
+  };
 
-  if(!Object.keys(keyboardState).includes(e.key)) return;
+  if (!Object.keys(keyboardState).includes(e.key)) return;
 
   keyboardState[e.key](player);
 
   stateListener(gameState);
 }
 
-function fillCanvasPlayer(xPosition,yPosition, size, color) {
+function fillCanvasPlayer(xPosition, yPosition, size, color) {
   ctx.fillStyle = color;
   ctx.fillRect(xPosition * size, yPosition * size, size, size);
 }
@@ -209,11 +221,10 @@ function paintGame(state) {
 
   const size = gameScreen.width / gridSize;
 
-  foodGenerate(state)
+  foodGenerate(state);
 
-  paintPlayer(state.player, size, SNAKE_COLOUR)
+  paintPlayer(state.player, size, SNAKE_COLOUR);
 }
-
 
 function paintPlayer(player, size, colour) {
   const playerPosition = player.pos;

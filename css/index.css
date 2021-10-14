@@ -23,6 +23,9 @@ canvas {
   color: rgb(255, 255, 255);
 }
 
+#gameTime {
+  color: white;
+}
 
 #gameUsername {
   display: flex;

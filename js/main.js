@@ -58,8 +58,6 @@ function start() {
   document.addEventListener("timeupdate", () => {
     gameTime.innerHTML = `Time: ${(gameState.currentTime += 1)}`;
   });
-
-  setGameTime(3000);
 }
 
 function setGameTime(time = 3000) {
@@ -90,17 +88,13 @@ function handleScore(score) {
   gameScore.innerHTML = `Score: ${score}`;
 }
 
-function foodRegeneration(state) {
+function foodRegeneration(state, index) {
   const foods = state.food;
 
   const positionX = Math.floor(Math.random() * (19 - 0 + 1) + 0);
   const positionY = Math.floor(Math.random() * (19 - 0 + 1) + 0);
-
-  foods.forEach((food) => {
-    console.log(food);
-    setState(food, { x: positionX, y: positionY });
-    foodGenerate(state);
-  });
+  setState(foods[index], { x: positionX, y: positionY });
+  foodGenerate(state);
 }
 
 function foodGenerate(state) {
@@ -167,11 +161,12 @@ function stateListener(state) {
   const player = state.player;
   const food = state.food;
 
-  food.forEach((item) => {
+  food.forEach((item, index) => {
     if (player.pos.x === item.x && player.pos.y === item.y) {
       Object.assign(player, { score: player.score + 1 });
       handleScore(gameState.player.score);
-      foodRegeneration(gameState);
+
+      foodRegeneration(gameState, index);
     }
   });
 }
